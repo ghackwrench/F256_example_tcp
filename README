@@ -1,0 +1,16 @@
+This is a simple demo app showing how to use TCP. It acts as a simple
+terminal program, sending one character at a time to the hard-coded
+remote echo server.
+
+- While disconnected, any ASCII key will init a connect.
+- CTRL-D closes the socket.
+- CTRL-C exits.
+
+The code also shows how to set up and maintain timer events.
+
+This is demo code. It is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+
+                    - Jessie Oberreuter <gadget@moselle.com>.
+
