@@ -207,6 +207,11 @@ _timer
             lda     #2
             sta     io_ctrl
             ;inc     $c000
+
+          ; Try to push an empty packet to force a retransmit.
+          ; The modern internet barely needs this, but your
+          ; wifi may be particularly bad...
+            jsr     tcp_push
     
           ; Schedule the next event
             jsr     timer_schedule
@@ -247,7 +252,31 @@ _send
           ; Could use event.key.ascii as the buffer,
           ; but that would be confusing :).
             sta     tx_buf
+            
+          ; A = # of bytes to send.
+            lda     #1
+            jmp     tcp_send
+            
+tcp_push
+    ; Push an empty buffer.  This will keep NATs from
+    ; dropping connections, and will help with crappy
+    ; wifi conditions.  In theory, the internet is lossy;
+    ; in practice, it rarely misses a beat.
     
+            lda     state
+            eor     #STATE.ESTABLISHED
+            beq     _push
+            rts
+_push            
+            lda     #0
+            jmp     tcp_send
+
+tcp_send:
+    ; A = # of bytes (from tx_buf) to send.
+    
+          ; Set the # of bytes in the buffer.
+            sta     kernel.args.net.buflen
+
           ; Set the socket.
             lda     #<socket
             sta     kernel.args.net.socket+0
@@ -259,8 +288,6 @@ _send
             sta     kernel.args.net.buf+0
             lda     #>tx_buf
             sta     kernel.args.net.buf+1
-            lda     #1
-            sta     kernel.args.net.buflen
     
           ; Send the data!
             jmp     kernel.Net.TCP.Send
